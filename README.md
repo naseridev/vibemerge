@@ -18,17 +18,17 @@ VibeMerge is a utility that merges multiple text files from a project directory 
 
 ### Basic Usage
 ```bash
-./vibemerge.py /path/to/your/project
+./vmrg.py /path/to/your/project
 ```
 
 ### With Custom Output File
 ```bash
-./vibemerge.py /path/to/your/project -o custom_output.txt
+./vmrg.py /path/to/your/project -o custom_output.txt
 ```
 
 ### With Ignore Patterns
 ```bash
-./vibemerge.py /path/to/your/project -i .vibeignore
+./vmrg.py /path/to/your/project -i .vibeignore
 ```
 
 ## Command Line Options
