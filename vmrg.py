@@ -71,30 +71,65 @@ def is_text(filepath):
 
 def compress_code(content):
     result = []
-    in_string = False
-    string_char = None
-    escaped = False
+    i = 0
+    n = len(content)
     
-    for char in content:
-        if escaped:
-            result.append(char)
-            escaped = False
+    while i < n:
+        ch = content[i]
+        
+        if ch == '\\' and i + 1 < n:
+            result.append(ch)
+            result.append(content[i + 1])
+            i += 2
             continue
+        
+        if ch in ('"', "'"):
+            quote = ch
+            result.append(ch)
+            i += 1
             
-        if char == string_char and in_string:
-            in_string = False
-            string_char = None
-            result.append(char)
+            while i < n:
+                ch = content[i]
+                result.append(ch)
+                
+                if ch == '\\' and i + 1 < n:
+                    result.append(content[i + 1])
+                    i += 2
+                    continue
+                
+                if ch == quote:
+                    i += 1
+                    break
+                
+                i += 1
             continue
+        
+        if ch == '`':
+            result.append(ch)
+            i += 1
             
-        if in_string:
-            result.append(char)
+            while i < n:
+                ch = content[i]
+                result.append(ch)
+                
+                if ch == '\\' and i + 1 < n:
+                    result.append(content[i + 1])
+                    i += 2
+                    continue
+                
+                if ch == '`':
+                    i += 1
+                    break
+                
+                i += 1
             continue
-            
-        if char in (' ', '\n', '\t', '\r'):
+        
+        if ch in (' ', '\n', '\t', '\r'):
+            i += 1
             continue
-            
-        result.append(char)
+        
+        result.append(ch)
+        i += 1
     
     return ''.join(result)
 
