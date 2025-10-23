@@ -312,12 +312,13 @@ Examples:
                 print(f"Size after:  {format_bytes(compressed_size)}")
                 reduction = ((size - compressed_size) / size * 100) if size > 0 else 0
                 print(f"Reduction:   {reduction:.1f}%")
-                print(f"Compressed:  Yes")
             else:
                 print(f"Size:        {format_bytes(size)}")
+            print(f"Output:      {outpath}")
+            if args.compress:
+                print(f"Compressed:  Yes")
             if args.dont_comment:
                 print(f"No Comments: Yes")
-            print(f"Output:      {outpath}")
         return 0
 
     except KeyboardInterrupt:
