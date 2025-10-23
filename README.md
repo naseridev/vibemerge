@@ -257,7 +257,3 @@ This tool is provided as-is for use in AI-assisted development workflows.
 
 **Problem**: Encoding errors  
 **Solution**: VibeMerge automatically handles these with replacement characters
-
----
-
-**Happy Vibe Coding! 🚀**
