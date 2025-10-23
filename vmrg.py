@@ -208,10 +208,27 @@ def merge_files(directory, output, ignore, compress, no_comment, quiet):
     total_lines = 0
 
     with open(outpath, 'w', encoding='utf-8') as out:
+        if compress:
+            out.write("=" * 80 + "\n")
+            out.write("SYSTEM INSTRUCTION FOR AI\n")
+            out.write("=" * 80 + "\n")
+            out.write("This code has been compressed to reduce token usage.\n")
+            out.write("When generating responses or code:\n")
+            out.write("- Write code in normal, readable format with proper spacing\n")
+            out.write("- Use standard indentation and line breaks\n")
+            out.write("- Follow conventional formatting practices\n")
+            out.write("- DO NOT compress or minify your output\n")
+            out.write("=" * 80 + "\n\n")
+        
         if no_comment:
-            out.write("IMPORTANT: This code is merged for AI processing.\n")
-            out.write("When generating output, DO NOT add comments or docstrings.\n")
-            out.write("Provide clean, production-ready code only.\n\n")
+            out.write("=" * 80 + "\n")
+            out.write("SYSTEM INSTRUCTION FOR AI\n")
+            out.write("=" * 80 + "\n")
+            out.write("When generating code:\n")
+            out.write("- DO NOT add comments or docstrings\n")
+            out.write("- Provide clean, production-ready code only\n")
+            out.write("- Focus on functionality, not documentation\n")
+            out.write("=" * 80 + "\n\n")
 
         for i, fpath in enumerate(files):
             if not quiet:
@@ -295,11 +312,12 @@ Examples:
                 print(f"Size after:  {format_bytes(compressed_size)}")
                 reduction = ((size - compressed_size) / size * 100) if size > 0 else 0
                 print(f"Reduction:   {reduction:.1f}%")
+                print(f"Compressed:  Yes")
             else:
                 print(f"Size:        {format_bytes(size)}")
+            if args.dont_comment:
+                print(f"No Comments: Yes")
             print(f"Output:      {outpath}")
-            print(f"Compressed:  {'Yes' if args.compress else 'No'}")
-            print(f"AI directive: {'Yes' if args.dont_comment else 'No'}")
         return 0
 
     except KeyboardInterrupt:
