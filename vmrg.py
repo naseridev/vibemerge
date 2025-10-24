@@ -143,17 +143,16 @@ class TUI:
 
 
 class ProgressTracker:
-    def __init__(self, total, prefix="", tui=None, show_progress=True):
+    def __init__(self, total, prefix="", tui=None):
         self.total = total
         self.prefix = prefix
         self.tui = tui
         self.current = 0
         self.lock = threading.Lock()
         self.start_time = time.time()
-        self.show_progress = show_progress
 
     def update(self, increment=1):
-        if not self.tui or self.tui.quiet or not self.show_progress:
+        if not self.tui or self.tui.quiet:
             return
 
         with self.lock:
@@ -161,7 +160,7 @@ class ProgressTracker:
             self.tui.progress_bar(self.current, self.total, self.prefix)
 
     def finish(self):
-        if self.tui and not self.tui.quiet and self.show_progress:
+        if self.tui and not self.tui.quiet:
             elapsed = time.time() - self.start_time
             self.tui.print_info("Time elapsed", format_time(elapsed))
 
@@ -355,7 +354,7 @@ def resolve_paths(paths):
     return resolved_files, resolved_dirs
 
 
-def collect_files_from_dirs(directories, patterns, tui, show_progress=True):
+def collect_files_from_dirs(directories, patterns, tui):
     all_paths = deque()
 
     for directory in directories:
@@ -371,7 +370,7 @@ def collect_files_from_dirs(directories, patterns, tui, show_progress=True):
     tui.print_section("SCANNING FILES")
     tui.print_info("Total files found", f"{len(all_paths):,}")
 
-    tracker = ProgressTracker(len(all_paths), "Scanning", tui, show_progress)
+    tracker = ProgressTracker(len(all_paths), "Scanning", tui)
 
     valid_files = []
     total = 0
@@ -401,7 +400,7 @@ def collect_files_from_dirs(directories, patterns, tui, show_progress=True):
     tracker.finish()
     return valid_files, total
 
-def collect_files(input_files, directories, patterns, tui, show_progress=True):
+def collect_files(input_files, directories, patterns, tui):
     files = []
     total = 0
 
@@ -409,7 +408,7 @@ def collect_files(input_files, directories, patterns, tui, show_progress=True):
         tui.print_section("VALIDATING FILES")
         tui.print_info("Input files", f"{len(input_files):,}")
 
-        tracker = ProgressTracker(len(input_files), "Validating", tui, show_progress)
+        tracker = ProgressTracker(len(input_files), "Validating", tui)
 
         for fpath in input_files:
             tracker.update()
@@ -434,7 +433,7 @@ def collect_files(input_files, directories, patterns, tui, show_progress=True):
         tracker.finish()
 
     if directories:
-        dir_files, dir_size = collect_files_from_dirs(directories, patterns, tui, show_progress)
+        dir_files, dir_size = collect_files_from_dirs(directories, patterns, tui)
 
         if total + dir_size > MAX_TOTAL_SIZE:
             remaining = MAX_TOTAL_SIZE - total
@@ -480,20 +479,16 @@ def merge_files(paths, output, ignore, compress, no_comment, quiet, parallel):
     num_cpus = cpu_count()
     use_parallel = parallel and len(files) >= MIN_PARALLEL_FILES and num_cpus > 1
 
-    total_lines_estimate = sum(f[0].stat().st_size // 40 for f in files)
-    show_progress = total_lines_estimate >= 2048
+    tui.print_section("PROCESSING FILES")
+    tui.print_info("Valid files", f"{len(files):,}")
+    tui.print_info("Total size", format_bytes(total_size))
+    tui.print_info("Processing mode", f"Parallel ({num_cpus} CPUs)" if use_parallel else "Sequential")
+    if compress:
+        tui.print_info("Compression", "Enabled")
+    if no_comment:
+        tui.print_info("No comments", "Enabled")
 
-    if show_progress:
-        tui.print_section("PROCESSING FILES")
-        tui.print_info("Valid files", f"{len(files):,}")
-        tui.print_info("Total size", format_bytes(total_size))
-        tui.print_info("Processing mode", f"Parallel ({num_cpus} CPUs)" if use_parallel else "Sequential")
-        if compress:
-            tui.print_info("Compression", "Enabled")
-        if no_comment:
-            tui.print_info("No comments", "Enabled")
-
-        print()
+    print()
 
     merge_start = time.time()
     compressed_size = 0
@@ -522,7 +517,7 @@ def merge_files(paths, output, ignore, compress, no_comment, quiet, parallel):
 
         if use_parallel:
             results = [None] * len(files)
-            tracker = ProgressTracker(len(files), "Processing", tui, show_progress)
+            tracker = ProgressTracker(len(files), "Processing", tui)
 
             with ProcessPoolExecutor(max_workers=num_cpus) as executor:
                 futures = {
@@ -540,7 +535,7 @@ def merge_files(paths, output, ignore, compress, no_comment, quiet, parallel):
             tracker.finish()
 
             write_start = time.time()
-            write_tracker = ProgressTracker(len(results), "Writing", tui, show_progress)
+            write_tracker = ProgressTracker(len(results), "Writing", tui)
 
             for i, result in enumerate(results):
                 write_tracker.update()
@@ -561,7 +556,7 @@ def merge_files(paths, output, ignore, compress, no_comment, quiet, parallel):
             write_tracker.finish()
 
         else:
-            tracker = ProgressTracker(len(files), "Merging", tui, show_progress)
+            tracker = ProgressTracker(len(files), "Merging", tui)
 
             for i, (fpath, basedir) in enumerate(files):
                 tracker.update()
