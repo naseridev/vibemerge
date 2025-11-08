@@ -25,7 +25,7 @@ git clone https://github.com/naseridev/vibemerge.git
 ```
 
 ```bash
-cd vmrg
+cd vibemerge
 ```
 
 ```bash
