@@ -106,7 +106,7 @@ AI_FORMAT_DIRECTIVE = (
             "   with forward slashes. Never invent new locations for existing",
             "   files.",
             "9. Output ONLY the files and directories that need to be created,",
-            "   modified, renamed or deleted. If something does not need changes,"
+            "   modified, renamed or deleted. If something does not need changes,",
             "   leave it out entirely.",
             "10. NEVER compress or minify your reply. Always use normal",
             "    indentation, spacing and line breaks.",
@@ -278,21 +278,14 @@ class TUI:
     def paint(self, text, role):
         return self.theme.paint(text, role)
 
-    def banner(self, subtitle):
-        if self.quiet:
-            return
-        print()
-        print(
-            self.paint(f"* VibeMerge v{VERSION}", "accent")
-            + "  "
-            + self.paint(subtitle, "dim")
-        )
-
     def print_header(self, text):
         if self.quiet:
             return
+        width = min(self.term_width, 80)
         print()
+        print(self.paint("-" * width, "dim"))
         print(self.paint(text + ":", "accent"))
+        print(self.paint("-" * width, "dim"))
         print()
 
     def print_section(self, text):
@@ -1047,7 +1040,6 @@ class MergeEngine:
 
     def run(self):
         tui = self.tui
-        tui.banner("merge")
 
         input_files, directories = resolve_paths(self.paths)
         if not input_files and not directories:
@@ -1562,7 +1554,6 @@ class ApplyEngine:
 
     def run(self):
         tui = self.tui
-        tui.banner("apply")
 
         merged_inputs = self._resolve_inputs()
         target = self._resolve_target(merged_inputs)
